@@ -1,16 +1,20 @@
 <template>
-  <div class="counter counter--orange ingredients__counter">
+  <div class="counter" :class="props.cssClass">
     <counter-button
       css-class="counter__button--minus"
       label="Меньше"
-      :disabled="count <= MIN_INGREDIENTS_COUNT"
+      :disabled="count <= props.minCount"
       @click="decrement"
     ></counter-button>
-    <counter-value v-model="count" />
+    <counter-value
+      v-model="count"
+      :min="props.minCount"
+      :max="props.maxCount"
+    />
     <counter-button
-      css-class="counter__button--plus"
+      :css-class="`counter__button--plus counter__button--${props.color}`"
       label="Больше"
-      :disabled="count >= MAX_INGREDIENTS_COUNT"
+      :disabled="count >= props.maxCount"
       @click="increment"
     ></counter-button>
   </div>
@@ -26,6 +30,29 @@ import {
 } from "@/common/constants";
 const emit = defineEmits(["update:modelValue"]);
 
+const props = defineProps({
+  cssClass: {
+    type: String,
+    default: "",
+  },
+  color: {
+    type: String,
+    default: "orange",
+  },
+  minCount: {
+    type: Number,
+    default: MIN_INGREDIENTS_COUNT,
+  },
+  maxCount: {
+    type: Number,
+    default: MAX_INGREDIENTS_COUNT,
+  },
+  modelValue: {
+    type: Number,
+    required: true,
+  },
+});
+
 const count = computed({
   get() {
     return props.modelValue;
@@ -36,28 +63,16 @@ const count = computed({
 });
 
 const decrement = () => {
-  if (count.value <= MIN_INGREDIENTS_COUNT) return;
+  if (count.value <= props.minCount) return;
   count.value = count.value - 1;
 };
 
 const increment = () => {
-  if (count.value >= MAX_INGREDIENTS_COUNT) return;
+  if (count.value >= props.maxCount) return;
   count.value = count.value + 1;
 };
-
-const props = defineProps({
-  modelValue: {
-    type: Number,
-    required: true,
-  },
-});
 </script>
 <style lang="scss" scoped>
 @import "@/assets/scss/app.scss";
 @import "@/assets/scss/blocks/counter";
-.ingredients__counter {
-  width: 54px;
-  margin-top: 10px;
-  margin-left: 36px;
-}
 </style>

@@ -41,21 +41,21 @@
             label="Название пиццы"
             placeholder="Введите название пиццы"
             name="pizza_name"
+            :is-hidden-label="true"
           ></app-input>
 
           <!-- конструктор пиццы -->
           <pizza-constructor-view :order="order"></pizza-constructor-view>
 
-          <!--            //todo расчет суммы -->
           <div class="content__result">
-            <p>Итого: 0 ₽</p>
+            <p>Итого: {{ sum }} ₽</p>
             <app-button
-              v-model="order.name"
               label="Готовьте!"
               name="order_submit"
               :disabled="
                 selectedIngredients.length === 0 || order.name.length === 0
               "
+              @click="submitOrder"
             ></app-button>
           </div>
         </div>
@@ -65,18 +65,9 @@
 </template>
 
 <script setup>
-import doughs from "@/mocks/dough.json";
-import ingredients from "@/mocks/ingredients.json";
-import sauces from "@/mocks/sauces.json";
-import sizes from "@/mocks/sizes.json";
-import {
-  normalizeDough,
-  normalizeIngredients,
-  normalizeSauces,
-  normalizeSize,
-} from "@/common/helpers/normalize.js";
+import { computed, reactive } from "vue";
+import { useRouter } from "vue-router";
 import DoughTypeSelection from "@/modules/constructor/DoughTypeSelection.vue";
-import { computed, reactive, watch } from "vue";
 import DoughSizeSelection from "@/modules/constructor/DoughSizeSelection.vue";
 import SauceTypeSelection from "@/modules/constructor/SauceTypeSelection.vue";
 import PizzaConstructorView from "@/modules/constructor/PizzaConstructorView.vue";
@@ -84,7 +75,6 @@ import PizzaIngredientsSelection from "@/modules/constructor/PizzaIngredientsSel
 import AppInput from "@/common/components/AppInput.vue";
 import AppButton from "@/common/components/AppButton.vue";
 
-const emit = defineEmits(["update:sum"]);
 const props = defineProps({
   sum: {
     type: Number,
@@ -97,6 +87,18 @@ const props = defineProps({
 });
 
 const order = reactive(props.order);
+const router = useRouter();
+
+import doughs from "@/mocks/dough.json";
+import ingredients from "@/mocks/ingredients.json";
+import sauces from "@/mocks/sauces.json";
+import sizes from "@/mocks/sizes.json";
+import {
+  normalizeDough,
+  normalizeIngredients,
+  normalizeSauces,
+  normalizeSize,
+} from "@/common/helpers/normalize.js";
 
 const doughTypeList = doughs.map(normalizeDough);
 const ingredientList = ingredients.map(normalizeIngredients);
@@ -107,56 +109,11 @@ const selectedIngredients = computed(() => {
   return order.ingredients.filter((ingredient) => ingredient.count > 0);
 });
 
-order.ingredients = ingredientList;
-if (!props.order.sauce && sauceList.length && sauceList[0].value) {
-  order.sauce = sauceList[0].value;
+function submitOrder() {
+  router.push({ name: "BasketView" });
 }
-if (!props.order.dough && doughTypeList.length && doughTypeList[0].value) {
-  order.dough = doughTypeList[0].value;
-}
-if (!props.order.size && doughSizeList.length && doughSizeList[0].value) {
-  order.size = doughSizeList[0].value;
-}
-
-const sum = computed({
-  get() {
-    return props.sum;
-  },
-  set(value) {
-    emit("update:sum", value);
-  },
-});
-
-const calculatedSum = computed(() => {
-  const { dough, size, sauce, ingredients } = order;
-  const sizeMultiplier =
-    doughSizeList.find((item) => item.value === size)?.multiplier ?? 1;
-
-  const doughPrice =
-    doughTypeList.find((item) => item.value === dough)?.price ?? 0;
-
-  const saucePrice = sauceList.find((item) => item.value === sauce)?.price ?? 0;
-
-  const ingredientsPrice = ingredients
-    .filter((item) => item.count > 0)
-    .reduce((acc, item) => acc + item.price * item.count, 0);
-
-  //sum.value = total; //todo не нравится использование watch либо костыль здесь. Не придумал, как лучше.
-  return (doughPrice + saucePrice + ingredientsPrice) * sizeMultiplier;
-});
-
-watch(
-  calculatedSum,
-  (newVal) => {
-    emit("update:sum", newVal);
-  },
-  { immediate: true },
-);
 </script>
 
 <style lang="scss" scoped>
 @import "@/assets/scss/app.scss";
-@import "@/assets/scss/layout/content";
-@import "@/assets/scss/layout/sheet";
-@import "@/assets/scss/blocks/title";
 </style>
