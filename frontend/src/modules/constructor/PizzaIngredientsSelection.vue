@@ -16,7 +16,11 @@
             :transfer-data="ingredient"
             :draggable="ingredientsCount[ingredient.id] < MAX_INGREDIENTS_COUNT"
           >
-            <span :class="`filling filling--${ingredient.value}`">
+            <span class="filling">
+              <img
+                :src="getPublicImage(ingredient.image)"
+                :alt="ingredient.name"
+              />
               {{ ingredient.name }}
             </span>
           </app-drag>
@@ -43,6 +47,7 @@ import AppDrag from "@/common/components/AppDrag.vue";
 import AppDrop from "@/common/components/AppDrop.vue";
 import { MAX_INGREDIENTS_COUNT } from "@/common/constants";
 import AppCounter from "@/modules/counter/AppCounter.vue";
+import { getPublicImage } from "@/common/helpers/helpers";
 
 const props = defineProps({
   modelValue: {

@@ -4,251 +4,114 @@
       <h1 class="title title--big">История заказов</h1>
     </div>
 
-    <!--    //todo цикл из списка заказов -->
-    <section class="sheet order">
+    <section
+      v-for="order in profileStore.ordersData"
+      :key="order.id"
+      class="sheet order"
+    >
       <div class="order__wrapper">
         <div class="order__number">
-          <!--          //todo номер заказа-->
-          <b>Заказ #{{ order?.number || "100500" }}</b>
+          <b>Заказ #{{ order?.id }}</b>
         </div>
 
         <div class="order__sum">
-          <span>Сумма заказа: {{ sum }} ₽</span>
+          <span>Сумма заказа: {{ order.sum }} ₽</span>
         </div>
 
-        <!--          //todo передавать в кнопки заказ (номер/id)-->
         <div class="order__button">
           <app-button
             label="Удалить"
             name="delete"
             :has-border="true"
-            @click="deleteOrder"
+            @click="profileStore.deleteOrder(order.id)"
           ></app-button>
         </div>
         <div class="order__button">
           <app-button
             label="Повторить"
             name="repeat"
-            @click="repeatOrder"
+            @click="repeatOrder(order)"
           ></app-button>
         </div>
       </div>
 
-      <ul class="order__list">
-        <!--    //todo цикл из элементов одного заказа -->
-        <li class="order__item">
-          <div class="product">
-            <img
-              :src="getImage('product.svg')"
-              class="product__img"
-              width="56"
-              height="56"
-              alt="Капричоза"
-            />
-            <div class="product__text">
-              <h2>Капричоза</h2>
-              <ul>
-                <li>30 см, на тонком тесте</li>
-                <li>Соус: томатный</li>
-                <li>
-                  Начинка: грибы, лук, ветчина, пармезан, ананас, бекон, блю чиз
-                </li>
-              </ul>
+      <ul v-if="order?.orderPizzas?.length > 0" class="order__list">
+        <li
+          v-for="pizza in order.orderPizzas"
+          :key="pizza.id"
+          class="order__item"
+        >
+          <template v-if="pizza.priceSum > 0 && pizza.quantity > 0">
+            <div class="product">
+              <img
+                :src="getPublicImage('/public/img/product.svg')"
+                class="product__img"
+                width="56"
+                height="56"
+                :alt="pizza.name"
+              />
+              <div class="product__text">
+                <h2>{{ pizza.name }}</h2>
+                <ul>
+                  <li>
+                    Диаметер {{ pizza.size.name }}, {{ pizza.dough.name }} тесто
+                  </li>
+                  <li>Соус: {{ pizza.sauce.name }}</li>
+                  <li>
+                    Начинка:
+                    {{ pizza.ingredients.map((i) => i.name).join(", ") }}
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
 
-          <p class="order__price">782 ₽</p>
-        </li>
-        <li class="order__item">
-          <div class="product">
-            <img
-              :src="getImage('product.svg')"
-              class="product__img"
-              width="56"
-              height="56"
-              alt="Капричоза"
-            />
-            <div class="product__text">
-              <h2>Моя любимая</h2>
-              <ul>
-                <li>30 см, на тонком тесте</li>
-                <li>Соус: томатный</li>
-                <li>Начинка: грибы, лук, ветчина, пармезан, ананас</li>
-              </ul>
-            </div>
-          </div>
-
-          <p class="order__price">2х782 ₽</p>
+            <p class="order__price">
+              {{ pizza.priceSum }} ₽ × {{ pizza.quantity }}
+            </p>
+          </template>
         </li>
       </ul>
 
-      <!--    //todo цикл из допников к заказу -->
-      <ul class="order__additional">
-        <li>
-          <img
-            :src="getImage('cola.svg')"
-            width="20"
-            height="30"
-            alt="Coca-Cola 0,5 литра"
-          />
-          <p>
-            <span>Coca-Cola 0,5 литра</span>
-            <b>56 ₽</b>
-          </p>
-        </li>
-        <li>
-          <img
-            :src="getImage('sauce.svg')"
-            width="20"
-            height="30"
-            alt="Острый соус"
-          />
-          <span>Острый соус <br />30 ₽</span>
-        </li>
-        <li>
-          <img
-            :src="getImage('potato.svg')"
-            width="20"
-            height="30"
-            alt="Картошка из печи"
-          />
-          <p>
-            <span>Картошка из печи</span>
-            <b>170 ₽</b>
-          </p>
+      <ul v-if="order?.orderMisc?.length > 0" class="order__additional">
+        <li v-for="misc in order.orderMisc" :key="misc.id">
+          <template v-if="misc.quantity > 0">
+            <img
+              :src="getPublicImage(misc.image)"
+              width="20"
+              height="30"
+              :alt="misc.name"
+            />
+            <p>
+              <span>{{ misc.name }} × {{ misc.quantity }}</span>
+              <b
+                >{{ misc.price }} ₽ × {{ misc.quantity }} шт. =
+                {{ misc.sum }} ₽</b
+              >
+            </p>
+          </template>
         </li>
       </ul>
 
       <p class="order__address">
-        Адрес доставки: Тест (или если адрес новый - писать целиком)
-      </p>
-    </section>
-
-    <section class="sheet order">
-      <div class="order__wrapper">
-        <div class="order__number">
-          <b>Заказ #11199929</b>
-        </div>
-
-        <div class="order__sum">
-          <span>Сумма заказа: 1 564 ₽</span>
-        </div>
-
-        <div class="order__button">
-          <button type="button" class="button button--border">Удалить</button>
-        </div>
-        <div class="order__button">
-          <button type="button" class="button">Повторить</button>
-        </div>
-      </div>
-
-      <ul class="order__list">
-        <li class="order__item">
-          <div class="product">
-            <img
-              :src="getImage('product.svg')"
-              class="product__img"
-              width="56"
-              height="56"
-              alt="Капричоза"
-            />
-            <div class="product__text">
-              <h2>Капричоза</h2>
-              <p>
-                30 см, на тонком тесте<br />
-                Соус: томатный<br />
-                Начинка: грибы, лук, ветчина, пармезан, ананас
-              </p>
-            </div>
-          </div>
-
-          <p class="order__price">782 ₽</p>
-        </li>
-        <li class="order__item">
-          <div class="product">
-            <img
-              :src="getImage('product.svg')"
-              class="product__img"
-              width="56"
-              height="56"
-              alt="Капричоза"
-            />
-            <div class="product__text">
-              <h2>Моя любимая</h2>
-              <p>
-                30 см, на тонком тесте<br />
-                Соус: томатный<br />
-                Начинка: грибы, лук, ветчина, пармезан, ананас
-              </p>
-            </div>
-          </div>
-
-          <p class="order__price">2х782 ₽</p>
-        </li>
-      </ul>
-
-      <ul class="order__additional">
-        <li>
-          <img
-            :src="getImage('cola.svg')"
-            width="20"
-            height="30"
-            alt="Coca-Cola 0,5 литра"
-          />
-          <p>
-            <span>Coca-Cola 0,5 литра</span>
-            <b>56 ₽</b>
-          </p>
-        </li>
-        <li>
-          <img
-            :src="getImage('sauce.svg')"
-            width="20"
-            height="30"
-            alt="Острый соус"
-          />
-          <p>
-            <span>Острый соус</span>
-            <b>30 ₽</b>
-          </p>
-        </li>
-        <li>
-          <img
-            :src="getImage('potato.svg')"
-            width="20"
-            height="30"
-            alt="Картошка из печи"
-          />
-          <p>
-            <span>Картошка из печи</span>
-            <b>170 ₽</b>
-          </p>
-        </li>
-      </ul>
-
-      <p class="order__address">
-        Адрес доставки: Тест (или если адрес новый - писать целиком)
+        Адрес доставки: {{ order.orderAddress?.name }}
       </p>
     </section>
   </div>
 </template>
 
 <script setup>
-import { reactive } from "vue";
 import AppButton from "@/common/components/AppButton.vue";
-import { getImage } from "@/common/helpers/helpers";
+import { getPublicImage } from "@/common/helpers/helpers";
+import { useCartStore, useProfileStore } from "@/stores";
+import { useRouter } from "vue-router";
 
-const order = reactive({});
-
-function deleteOrder() {
-  console.log("нажата удалить");
-  //todo логика удаления заказа
-}
-
-function repeatOrder() {
-  console.log("нажата повторить");
-  //todo логика повтора заказа
-}
+const cartStore = useCartStore();
+const profileStore = useProfileStore();
+const router = useRouter();
+const repeatOrder = (order) => {
+  cartStore.load(order);
+  router.push({ name: "BasketView" });
+};
 </script>
 
 <style lang="scss" scoped>

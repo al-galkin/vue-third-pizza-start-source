@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { computed, reactive, ref } from "vue";
 import { useDataStore } from "@/stores/data";
 import { calculatePizzaPrice } from "@/common/helpers/pizza-price";
+import { useAuthStore } from "@/stores/auth";
+import resources from "@/services/resources";
 
 export const useCartStore = defineStore("cart", () => {
   const defaultData = {
@@ -150,6 +152,43 @@ export const useCartStore = defineStore("cart", () => {
     phone.value = defaultData.phone;
   }
 
+  async function createOrder() {
+    const authStore = useAuthStore();
+
+    return await resources.order.createOrder({
+      userId: authStore.userId,
+      phone: phone.value,
+      address: address.value,
+      pizzas: pizzaList.value,
+      misc: miscList.value,
+    });
+
+    //todo насколько правильно отдавать ответ наружу? не правильнее ли обрабатывать ответ тут и выдавать уже success/fail наружу?
+  }
+
+  function load(order) {
+    pizzaList.value =
+      order?.orderPizzas?.map((pizza) => ({
+        name: pizza.name,
+        sauceId: pizza.sauce.id,
+        doughId: pizza.dough.id,
+        sizeId: pizza.size.id,
+        quantity: pizza.quantity,
+        ingredients: pizza.ingredients.map((ingredient) => ({
+          ingredientId: ingredient.id,
+          quantity: ingredient.quantity,
+        })),
+      })) ?? [];
+
+    miscList.value =
+      order?.orderMisc?.map((misc) => ({
+        miscId: misc.id,
+        quantity: misc.quantity,
+      })) ?? [];
+
+    phone.value = order.phone;
+  }
+
   return {
     sum,
     pizzaPrice,
@@ -172,5 +211,7 @@ export const useCartStore = defineStore("cart", () => {
     setPhone,
     setReceiveType,
     reset,
+    createOrder,
+    load,
   };
 });

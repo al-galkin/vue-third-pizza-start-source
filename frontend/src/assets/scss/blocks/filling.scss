@@ -25,6 +25,20 @@
 
   }
 
+  img {
+    @include p_center-v;
+
+    display: block;
+
+    width: 32px;
+    height: 32px;
+
+    box-sizing: border-box;
+    padding: 4px;
+
+    border-radius: 50%;
+  }
+
   &--tomatoes::before {
     background-image: url("../../img/filling/tomatoes.svg");
   }
