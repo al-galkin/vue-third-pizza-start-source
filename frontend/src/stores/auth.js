@@ -6,9 +6,36 @@ import { useProfileStore } from "@/stores/profile";
 import { SUCCESS_RESPONSE_ANSWER } from "@/common/constants";
 
 export const useAuthStore = defineStore("auth", () => {
-  const user = ref(null);
+  const defaultUser = {
+    id: "",
+    name: "",
+    email: "",
+    avatar: "",
+    phone: "",
+  };
+  const user = ref(defaultUser);
 
-  const isAuthorised = computed(() => !!user.value);
+  const isAuthorised = computed(() => !!user.value?.id);
+
+  const userId = computed(() => {
+    return user?.value.id ?? "";
+  });
+
+  const userPhone = computed(() => {
+    return user.value?.phone ?? "";
+  });
+
+  const userEmail = computed(() => {
+    return user.value?.email ?? "";
+  });
+
+  const userAvatar = computed(() => {
+    return user.value?.avatar ?? "";
+  });
+
+  const userName = computed(() => {
+    return user.value?.name ?? "";
+  });
 
   const login = async (data) => {
     const res = await resources.auth.login(data);
@@ -26,7 +53,7 @@ export const useAuthStore = defineStore("auth", () => {
 
     const userInfo = await resources.auth.whoAmI();
     if (userInfo.__state !== SUCCESS_RESPONSE_ANSWER) {
-      await this.logout();
+      await logout();
       return;
     } else {
       setUser(userInfo.data);
@@ -34,7 +61,7 @@ export const useAuthStore = defineStore("auth", () => {
 
     const userAddresses = await resources.address.getAddresses();
     if (userAddresses.__state !== SUCCESS_RESPONSE_ANSWER) {
-      await this.logout();
+      await logout();
       return;
     } else {
       profileStore.setAddresses(userAddresses.data);
@@ -42,7 +69,7 @@ export const useAuthStore = defineStore("auth", () => {
 
     const userOrders = await resources.order.getOrders();
     if (userOrders.__state !== SUCCESS_RESPONSE_ANSWER) {
-      await this.logout();
+      await logout();
     } else {
       profileStore.setOrders(userOrders.data);
     }
@@ -52,7 +79,7 @@ export const useAuthStore = defineStore("auth", () => {
     await resources.auth.logout();
     jwtService.removeToken();
     resources.auth.setAuthHeader("");
-    setUser(null);
+    setUser(defaultUser);
   };
 
   function setUser(userData) {
@@ -61,6 +88,11 @@ export const useAuthStore = defineStore("auth", () => {
 
   return {
     user,
+    userId,
+    userPhone,
+    userEmail,
+    userAvatar,
+    userName,
     isAuthorised,
     login,
     getMe,

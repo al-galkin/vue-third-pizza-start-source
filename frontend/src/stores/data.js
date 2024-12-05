@@ -1,16 +1,13 @@
 import { defineStore } from "pinia";
-import doughs from "@/mocks/dough.json";
-import ingredientsData from "@/mocks/ingredients.json";
-import sauces from "@/mocks/sauces.json";
-import sizes from "@/mocks/sizes.json";
-import miscData from "@/mocks/misc.json";
 import {
   normalizeDough,
   normalizeIngredients,
   normalizeSauces,
   normalizeSize,
 } from "@/common/helpers/normalize";
-import { shallowRef } from "vue";
+import { computed, shallowRef } from "vue";
+import resources from "@/services/resources";
+import { SUCCESS_RESPONSE_ANSWER } from "@/common/constants";
 
 /**  Доступные типы теста, размеры, ингредиенты и соусы. */
 export const useDataStore = defineStore("data", () => {
@@ -20,12 +17,59 @@ export const useDataStore = defineStore("data", () => {
   const doughSizeList = shallowRef([]);
   const misc = shallowRef([]);
 
-  function init() {
-    ingredients.value = ingredientsData.map(normalizeIngredients);
-    doughTypeList.value = doughs.map(normalizeDough);
-    sauceList.value = sauces.map(normalizeSauces);
-    doughSizeList.value = sizes.map(normalizeSize);
-    misc.value = miscData;
+  const isDataLoaded = computed(() => {
+    return (
+      doughTypeList.value.length > 0 &&
+      ingredients.value.length > 0 &&
+      sauceList.value.length > 0 &&
+      doughSizeList.value.length > 0 &&
+      misc.value.length > 0
+    );
+  });
+
+  async function init() {
+    await Promise.all([
+      fetchIngredients(),
+      fetchDoughTypes(),
+      fetchSauces(),
+      fetchDoughSizes(),
+      fetchMisc(),
+    ]);
+  }
+
+  async function fetchIngredients() {
+    const res = await resources.ingredient.getIngredients();
+    if (res.__state === SUCCESS_RESPONSE_ANSWER) {
+      ingredients.value = res.data.map(normalizeIngredients);
+    }
+  }
+
+  async function fetchDoughTypes() {
+    const res = await resources.dough.getDoughs();
+    if (res.__state === SUCCESS_RESPONSE_ANSWER) {
+      doughTypeList.value = res.data.map(normalizeDough);
+    }
+  }
+
+  async function fetchSauces() {
+    const res = await resources.sauce.getSauces();
+    if (res.__state === SUCCESS_RESPONSE_ANSWER) {
+      sauceList.value = res.data.map(normalizeSauces);
+    }
+  }
+
+  async function fetchDoughSizes() {
+    const res = await resources.size.getSizes();
+    if (res.__state === SUCCESS_RESPONSE_ANSWER) {
+      doughSizeList.value = res.data.map(normalizeSize);
+    }
+  }
+
+  async function fetchMisc() {
+    const res = await resources.misc.getMisc();
+    if (res.__state === SUCCESS_RESPONSE_ANSWER) {
+      misc.value = res.data;
+    }
   }
 
   function getPriceByDoughId(doughId) {
@@ -85,5 +129,6 @@ export const useDataStore = defineStore("data", () => {
     getMultiplierBySizeId,
     getPriceByIngredientId,
     getPriceByMiscId,
+    isDataLoaded,
   };
 });

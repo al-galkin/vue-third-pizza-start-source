@@ -4,7 +4,7 @@ import { calculatePizzaPrice } from "@/common/helpers/pizza-price";
 import { useDataStore } from "@/stores/data";
 
 export const usePizzaStore = defineStore("pizza", () => {
-  const defaultState = {
+  const defaultPizza = {
     index: null,
     name: "",
     doughId: 0,
@@ -13,12 +13,12 @@ export const usePizzaStore = defineStore("pizza", () => {
     ingredients: [],
   };
 
-  const index = ref(defaultState.index);
-  const name = ref(defaultState.name);
-  const doughId = ref(defaultState.doughId);
-  const sizeId = ref(defaultState.sizeId);
-  const sauceId = ref(defaultState.sauceId);
-  const ingredients = ref(defaultState.ingredients);
+  const index = ref(defaultPizza.index);
+  const name = ref(defaultPizza.name);
+  const doughId = ref(defaultPizza.doughId);
+  const sizeId = ref(defaultPizza.sizeId);
+  const sauceId = ref(defaultPizza.sauceId);
+  const ingredients = ref(defaultPizza.ingredients);
   const dataStore = useDataStore();
 
   const priceSum = computed(() => {
@@ -152,12 +152,12 @@ export const usePizzaStore = defineStore("pizza", () => {
   }
 
   function reset() {
-    index.value = defaultState.index;
-    name.value = defaultState.name;
-    doughId.value = defaultState.doughId;
-    sizeId.value = defaultState.sizeId;
-    sauceId.value = defaultState.sauceId;
-    ingredients.value = defaultState.ingredients;
+    index.value = defaultPizza.index;
+    name.value = defaultPizza.name;
+    doughId.value = defaultPizza.doughId;
+    sizeId.value = defaultPizza.sizeId;
+    sauceId.value = defaultPizza.sauceId;
+    ingredients.value = defaultPizza.ingredients;
   }
 
   return {

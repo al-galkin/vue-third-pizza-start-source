@@ -5,163 +5,77 @@
     </div>
 
     <div class="user">
-      <picture>
-        <!--        <source
-          type="image/webp"
-          srcset="@img/users/user5@2x.webp 1x, @img/users/user5@4x.webp 2x"
-        />
-        <img
-          src="@img/users/user5@2x.jpg"
-          srcset="@img/users/user5@4x.jpg"
-          alt="Василий Ложкин"
-          width="72"
-          height="72"
-        />-->
-      </picture>
+      <img
+        :src="getPublicImage(authStore.userAvatar)"
+        :alt="authStore.userName"
+        width="72"
+        height="72"
+      />
       <div class="user__name">
-        <span>Василий Ложкин</span>
+        <span>{{ authStore.userName }}</span>
       </div>
       <p class="user__phone">
-        Контактный телефон: <span>+7 999-999-99-99</span>
+        Контактный телефон: <span>{{ authStore.userPhone }}</span>
       </p>
     </div>
 
-    <div class="layout__address">
-      <div class="sheet address-form">
-        <div class="address-form__header">
-          <b>Адрес №1. Тест</b>
-          <div class="address-form__edit">
-            <button type="button" class="icon" @click="editAddress">
-              <span class="visually-hidden">Изменить адрес</span>
-            </button>
-          </div>
-        </div>
-        <p>Невский пр., д. 22, кв. 46</p>
-        <small>Позвоните, пожалуйста, от проходной</small>
-      </div>
+    <div
+      v-for="(address, index) in profileStore.addresses"
+      :key="address.id"
+      class="layout__address"
+    >
+      <address-card
+        :address="address"
+        :index="index + 1"
+        @delete="profileStore.deleteAddress(address.id)"
+        @save="updateAddress(address, $event)"
+      />
     </div>
 
-    <div class="layout__address">
-      <form
-        action="#"
-        method="post"
-        class="address-form address-form--opened sheet"
-      >
-        <div class="address-form__header">
-          <b>Адрес №1</b>
-        </div>
-
-        <div class="address-form__wrapper">
-          <div class="address-form__input">
-            <app-input
-              v-model="address.name"
-              label="Название адреса*"
-              placeholder="Введите название адреса"
-              name="name"
-              :required="true"
-            ></app-input>
-          </div>
-          <div class="address-form__input address-form__input--size--normal">
-            <app-input
-              v-model="address.street"
-              label="Улица*"
-              placeholder="Введите название улицы"
-              name="street"
-              :required="true"
-            ></app-input>
-          </div>
-          <div class="address-form__input address-form__input--size--small">
-            <app-input
-              v-model="address.house"
-              label="Дом*"
-              placeholder="Введите номер дома"
-              name="house"
-              :required="true"
-            ></app-input>
-          </div>
-          <div class="address-form__input address-form__input--size--small">
-            <app-input
-              v-model="address.apartment"
-              label="Квартира"
-              placeholder="Введите № квартиры"
-              name="apartment"
-            ></app-input>
-          </div>
-          <div class="address-form__input">
-            <app-input
-              v-model="address.comment"
-              label="Комментарий"
-              placeholder="Введите комментарий"
-              name="comment"
-            ></app-input>
-          </div>
-        </div>
-
-        <div class="address-form__buttons">
-          <app-button
-            label="Удалить"
-            name="delete"
-            :is-transparent="true"
-            @click="deleteAddress"
-          ></app-button>
-          <app-button
-            label="Сохранить"
-            name="save"
-            @click="saveAddress"
-          ></app-button>
-        </div>
-      </form>
-    </div>
-
-    <div class="layout__button">
+    <div v-if="!isNewAddressFormOpened" class="layout__button">
       <app-button
         label="Добавить новый адрес"
         name="add"
         :has-border="true"
-        @click="addAddress"
+        @click="isNewAddressFormOpened = true"
       ></app-button>
+    </div>
+
+    <div v-else class="layout__address">
+      <address-edit-form
+        title="Новый адрес"
+        @save="createAddress"
+        @delete="isNewAddressFormOpened = false"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive } from "vue";
-import AppInput from "@/common/components/AppInput.vue";
+import { useProfileStore } from "@/stores/profile";
+import { useAuthStore } from "@/stores/auth";
+import AddressCard from "@/common/components/address/AddressCard.vue";
+import { ref } from "vue";
+import AddressEditForm from "@/common/components/address/AddressEditForm.vue";
 import AppButton from "@/common/components/AppButton.vue";
+import { getPublicImage } from "@/common/helpers/helpers";
 
-const emit = defineEmits(["update:sum"]);
-const props = defineProps({
-  sum: {
-    type: Number,
-    required: true,
-  },
-  order: {
-    type: Object,
-    required: true,
-  },
-});
+const authStore = useAuthStore();
+const profileStore = useProfileStore();
 
-const address = reactive({
-  name: "",
-  street: "",
-  house: "",
-  apartment: "",
-  comment: "",
-});
+const isNewAddressFormOpened = ref(false);
 
-function addAddress() {
-  //todo логика добавления адреса
-}
+const createAddress = async (address) => {
+  await profileStore.createAddress(address);
+  isNewAddressFormOpened.value = false;
+};
 
-function editAddress() {
-  //todo логика открытия доступности редактирования адреса
-}
-function saveAddress() {
-  //todo логика сохранения адреса
-}
-function deleteAddress() {
-  //todo логика удаления адреса
-}
+const updateAddress = (address, data) => {
+  profileStore.updateAddress({
+    ...address,
+    ...data,
+  });
+};
 </script>
 
 <style lang="scss" scoped>
@@ -172,4 +86,8 @@ function deleteAddress() {
 @import "@/assets/scss/blocks/address-form.scss";
 @import "@/assets/scss/blocks/button.scss";
 @import "@/assets/scss/blocks/icon.scss";
+
+.layout__address {
+  margin-top: 16px;
+}
 </style>

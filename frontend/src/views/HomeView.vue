@@ -1,5 +1,5 @@
 <template>
-  <main class="content">
+  <main v-if="useDataStore().isDataLoaded" class="content">
     <form action="#" method="post">
       <div class="content__wrapper">
         <h1 class="title title--big">Конструктор пиццы</h1>
@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import DoughTypeSelection from "@/modules/constructor/DoughTypeSelection.vue";
 import DoughSizeSelection from "@/modules/constructor/DoughSizeSelection.vue";
@@ -87,7 +87,9 @@ const cartStore = useCartStore();
 
 const router = useRouter();
 
-pizzaStore.init();
+onMounted(() => {
+  pizzaStore.init();
+});
 
 // todo: стоит ли вынести в store в таком виде? Учитывая, что там переменные, а не computed.
 //  Или дублировать переменные для каждого случая? Например: doughId и внешняя pizzaDoughId для get/set

@@ -18,7 +18,7 @@
           >
             <div class="product cart-list__product">
               <img
-                :src="getImage('product.svg')"
+                :src="getPublicImage('/public/img/product.svg')"
                 class="product__img"
                 width="56"
                 height="56"
@@ -31,12 +31,7 @@
                   <li>Соус: {{ pizza.sauce.name }}</li>
                   <li>
                     Начинка:
-                    <template
-                      v-for="ingredient in pizza.ingredients"
-                      :key="ingredient.id"
-                    >
-                      {{ ingredient.name }},
-                    </template>
+                    {{ pizza.ingredients.map((i) => i.name).join(", ") }}
                   </li>
                 </ul>
               </div>
@@ -75,7 +70,7 @@
             >
               <p class="additional-list__description">
                 <img
-                  :src="getImage(additionalItem.image + '.svg')"
+                  :src="getPublicImage(additionalItem.image)"
                   width="39"
                   height="60"
                   :alt="additionalItem.name"
@@ -84,6 +79,10 @@
               </p>
 
               <div class="additional-list__wrapper">
+                <!--                //todo не берет актуальное значение счетчик из хранилища (когда из созданных заказов возвращаешься - счетчик обнуляется - но только визуально.).
+                    В сторе при этом значение корректное. А также выше значение счетчика пицц работает корректно при такой же логике
+
+              {{additionalItem}} -->
                 <app-counter
                   v-model="additionalItem.quantity"
                   class="cart-list__counter"
@@ -109,13 +108,14 @@
 
               <app-select
                 v-model="receiveType"
-                :items="addressList"
+                :items="profileStore.addressOptions"
                 name="address"
               ></app-select>
             </label>
 
             <app-input
               v-model="phone"
+              style="width: 100%; margin-top: 15px"
               placeholder="+7 999-999-99-99"
               name="phone"
               :is-big-label="true"
@@ -198,10 +198,11 @@ import {
   useDataStore,
   usePizzaStore,
   useProfileStore,
+  useAuthStore,
 } from "@/stores";
-import { getImage } from "@/common/helpers/helpers";
+import { getPublicImage } from "@/common/helpers/helpers";
 import { computed } from "vue";
-import { HOME_ADDRESS_VALUE, NEW_ADDRESS_VALUE } from "@/common/constants";
+import { NEW_ADDRESS_VALUE } from "@/common/constants";
 
 const router = useRouter();
 
@@ -209,6 +210,7 @@ const dataStore = useDataStore();
 const cartStore = useCartStore();
 const pizzaStore = usePizzaStore();
 const profileStore = useProfileStore();
+const authStore = useAuthStore();
 
 const phone = computed({
   get() {
@@ -262,20 +264,16 @@ const comment = computed({
   },
 });
 
-const addressList = [
-  {
-    value: 1,
-    label: "Заберу сам",
-  },
-  {
-    value: 2,
-    label: " Новый адрес",
-  },
-  {
-    value: 3,
-    label: "Дом",
-  },
-];
+const address = computed(() => {
+  if (receiveType.value === NEW_ADDRESS_VALUE) {
+    return null;
+  } else {
+    return (
+      profileStore.addresses.find((a) => a.id === Number(receiveType.value)) ??
+      null
+    );
+  }
+});
 
 const editPizza = async (index) => {
   pizzaStore.setPizza({
@@ -285,15 +283,21 @@ const editPizza = async (index) => {
   await router.push({ name: "HomeView" });
 };
 
-function submitOrder() {
-  if (receiveType.value === HOME_ADDRESS_VALUE) {
+async function submitOrder() {
+  if (receiveType.value !== NEW_ADDRESS_VALUE) {
     const address = profileStore.addresses[0];
     cartStore.setAddressStreet(address.street);
     cartStore.setAddressHouse(address.building);
     cartStore.setAddressHouse(address.flat);
     cartStore.setAddressComment(address.comment);
   }
-  router.push({ name: "SuccessView" });
+
+  const res = await cartStore.createOrder();
+  if (res.__state === "success") {
+    authStore.isAuthorised && (await profileStore.loadOrders());
+    await router.push({ name: "SuccessView" });
+    cartStore.reset();
+  }
 }
 </script>
 

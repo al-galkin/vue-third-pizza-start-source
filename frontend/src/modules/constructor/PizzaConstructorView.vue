@@ -8,7 +8,7 @@
             :key="ingredient.id"
             :class="`pizza__filling pizza__filling--${
               ingredient.value
-            } ${getExtraClass(ingredient.count)}`"
+            } ${getExtraClass(ingredient.quantity)}`"
           ></div>
         </div>
       </div>

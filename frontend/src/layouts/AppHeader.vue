@@ -27,13 +27,13 @@
       <router-link :to="{ name: 'ProfileView' }">
         <picture>
           <img
-            :src="getPublicImage(authStore.user.avatar)"
+            :src="getPublicImage(authStore.userAvatar)"
             alt="Василий Ложкин"
             width="32"
             height="32"
           />
         </picture>
-        <span>Василий Ложкин</span>
+        <span>{{ authStore.userName }}</span>
       </router-link>
       <a class="header__logout" @click="authStore.logout">
         <span>Выйти</span>
@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { useCartStore, usePizzaStore, useAuthStore } from "../stores";
+import { useCartStore, usePizzaStore, useAuthStore } from "../stores/";
 import { getPublicImage } from "../common/helpers/helpers.js";
 const cartStore = useCartStore();
 const pizzaStore = usePizzaStore();

@@ -5,7 +5,8 @@ export const getImage = (image) => {
 
 export const getPublicImage = (path) => {
   const publicUrl = "/api";
-  return `${publicUrl}/${path}`;
+  const divider = path.startsWith("/") ? "" : "/";
+  return [publicUrl, path].join(divider);
 };
 
 export function generateUniqId() {
