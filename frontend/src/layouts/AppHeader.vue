@@ -3,7 +3,7 @@
     <div class="header__logo">
       <router-link :to="{ name: 'HomeView' }" class="logo">
         <img
-          src="@/assets/img/logo.svg"
+          src="../assets/img/logo.svg"
           alt="V!U!E! Pizza logo"
           width="90"
           height="40"
@@ -15,7 +15,7 @@
         {{ pizzaStore.priceSum || cartStore.sum }} ₽
       </router-link>
     </div>
-    <div v-if="!isAuthorised" class="header__user">
+    <div v-if="!authStore.isAuthorised" class="header__user">
       <router-link :to="{ name: 'AuthView' }" class="header__login">
         <span>Войти</span>
       </router-link>
@@ -24,18 +24,10 @@
       </router-link>
     </div>
     <div v-else class="header__user">
-      <router-link :to="{ name: 'ProfileView' }" class="logo">
+      <router-link :to="{ name: 'ProfileView' }">
         <picture>
-          <source
-            type="image/webp"
-            srcset="
-              @/assets/img/users/user5.webp    1x,
-              @/assets/img/users/user5@2x.webp 2x
-            "
-          />
           <img
-            src="@/assets/img/users/user5.jpg"
-            srcset="@/assets/img/users/user5@2x.jpg"
+            :src="getPublicImage(authStore.user.avatar)"
             alt="Василий Ложкин"
             width="32"
             height="32"
@@ -43,22 +35,19 @@
         </picture>
         <span>Василий Ложкин</span>
       </router-link>
-      <router-link :to="{ name: 'HomeView' }" class="header__logout">
+      <a class="header__logout" @click="authStore.logout">
         <span>Выйти</span>
-      </router-link>
+      </a>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-
-import { useCartStore } from "../stores/cart.js";
-import { usePizzaStore } from "../stores/pizza.js";
+import { useCartStore, usePizzaStore, useAuthStore } from "../stores";
+import { getPublicImage } from "../common/helpers/helpers.js";
 const cartStore = useCartStore();
 const pizzaStore = usePizzaStore();
-
-const isAuthorised = ref(false);
+const authStore = useAuthStore();
 </script>
 <style lang="scss" scoped>
 @import "@/assets/scss/ds-system/ds";

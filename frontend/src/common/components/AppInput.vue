@@ -11,6 +11,10 @@
       :disabled="props.disabled"
       :required="props.required"
     />
+
+    <span v-if="errorText.length > 0" class="error">
+      {{ errorText }}
+    </span>
   </label>
 </template>
 <script setup>
@@ -52,6 +56,10 @@ const props = defineProps({
   modelValue: {
     type: String || Number,
     required: true,
+  },
+  errorText: {
+    type: String,
+    default: "",
   },
 });
 

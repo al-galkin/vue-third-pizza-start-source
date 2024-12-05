@@ -6,7 +6,7 @@
 
     <div class="user">
       <picture>
-        <source
+        <!--        <source
           type="image/webp"
           srcset="@img/users/user5@2x.webp 1x, @img/users/user5@4x.webp 2x"
         />
@@ -16,7 +16,7 @@
           alt="Василий Ложкин"
           width="72"
           height="72"
-        />
+        />-->
       </picture>
       <div class="user__name">
         <span>Василий Ложкин</span>

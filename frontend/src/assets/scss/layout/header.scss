@@ -105,6 +105,10 @@
 }
 
 .header__logout {
+  &:hover {
+    cursor: pointer;
+  }
+
   &::before {
     display: inline-block;
 

@@ -6,4 +6,3 @@ export { default as MiscService } from "./misc-service";
 export { default as SauceService } from "./sauce-service";
 export { default as SizeService } from "./size-service";
 export { default as OrderService } from "./order-service";
-

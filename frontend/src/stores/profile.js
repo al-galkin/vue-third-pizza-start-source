@@ -12,6 +12,14 @@ export const useProfileStore = defineStore("profile", () => {
   const email = ref("");
   const password = ref("");
   const addresses = reactive(addressesList);
+  const orders = reactive([]);
+
+  function setAddresses(addressData) {
+    addresses.value = addressData;
+  }
+  function setOrders(ordersData) {
+    orders.value = ordersData;
+  }
 
   return {
     phone,
@@ -23,5 +31,7 @@ export const useProfileStore = defineStore("profile", () => {
     email,
     password,
     userId,
+    setAddresses,
+    setOrders,
   };
 });

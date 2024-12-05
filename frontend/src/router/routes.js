@@ -1,3 +1,5 @@
+import isAuthorised from "@/middlewares/isAuthorised.js";
+
 export default [
   {
     path: "/",
@@ -25,7 +27,10 @@ export default [
     path: "/user",
     name: "UserView",
     component: () => import("../views/UserView.vue"),
-    meta: { layout: "AppLayoutUser" },
+    meta: {
+      layout: "AppLayoutUser",
+      middlewares: [isAuthorised],
+    },
     children: [
       {
         path: "orders",

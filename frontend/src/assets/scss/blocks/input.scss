@@ -1,5 +1,6 @@
 .input {
   display: block;
+  position: relative;
 
   span {
     @include r-s14-h16;
@@ -7,6 +8,14 @@
     display: block;
 
     margin-bottom: 4px;
+  }
+
+  .error {
+    position: absolute;
+    bottom: -20px;
+    left: 15px;
+    color: $red-800;
+    font-size: 0.7rem;
   }
 
   input {
@@ -31,6 +40,10 @@
 
     &:focus {
       border-color: $green-500;
+    }
+
+    &--error {
+      border-color: $red-800;
     }
   }
 
