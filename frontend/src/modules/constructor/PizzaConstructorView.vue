@@ -3,13 +3,15 @@
     <app-drop class="column" @drop="addIngredient">
       <div :class="`pizza pizza--foundation--${props.size}-${props.sauce}`">
         <div class="pizza__wrapper">
-          <div
-            v-for="ingredient in props.ingredients"
-            :key="ingredient.id"
-            :class="`pizza__filling pizza__filling--${
-              ingredient.value
-            } ${getExtraClass(ingredient.quantity)}`"
-          ></div>
+          <transition-group name="scale">
+            <div
+              v-for="ingredient in props.ingredients"
+              :key="ingredient.id"
+              :class="`pizza__filling pizza__filling--${
+                ingredient.value
+              } ${getExtraClass(ingredient.quantity)}`"
+            ></div>
+          </transition-group>
         </div>
       </div>
     </app-drop>
